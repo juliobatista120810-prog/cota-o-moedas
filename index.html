@@ -49,18 +49,17 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const currencyDataDiv = document.getElementById('currency-data');
-            currencyDataDiv.innerHTML = ''; // Limpa o conteúdo inicial
+            currencyDataDiv.innerHTML = '';
 
             async function fetchCurrency(from, to) {
                 try {
-                    // SE FOR KWANZA (AOA): Usa uma API alternativa que suporta a moeda de Angola
                     if (from === "AOA") {
                         const urlAlternative = `https://open.er-api.com/v6/latest/AOA`;
                         const response = await fetch(urlAlternative);
                         const data = await response.json();
                         
                         if (data && data.rates && data.rates[to]) {
-                            const valorEmBRL = data.rates[to]; // Quanto vale 1 Kwanza em Real
+                            const valorEmBRL = data.rates[to]; 
                             
                             const card = document.createElement("div");
                             card.classList.add("currency-card");
@@ -75,10 +74,9 @@
                         } else {
                             throw new Error();
                         }
-                        return; // Para a execução aqui para o Kwanza
+                        return; 
                     }
 
-                    // PARA AS OUTRAS MOEDAS: Continua usando a AwesomeAPI padrão
                     const url = `https://economia.awesomeapi.com.br/json/last/${from}-${to}`;
                     const response = await fetch(url);
                     const data = await response.json();
@@ -108,11 +106,10 @@
                 }
             }
 
-            // Chamada das funções em ordem
             fetchCurrency("USD", "BRL");
             fetchCurrency("EUR", "BRL");
             fetchCurrency("BTC", "BRL");
-            fetchCurrency("AOA", "BRL"); // Agora vai funcionar perfeitamente!
+            fetchCurrency("AOA", "BRL"); 
         });
     </script>
 </body>
