@@ -52,10 +52,34 @@
             currencyDataDiv.innerHTML = ''; // Limpa o conteúdo inicial
 
             async function fetchCurrency(from, to) {
-                // Correção da URL que estava cortada
-                const url = `https://economia.awesomeapi.com.br/json/last/${from}-${to}`;
-                
                 try {
+                    // SE FOR KWANZA (AOA): Usa uma API alternativa que suporta a moeda de Angola
+                    if (from === "AOA") {
+                        const urlAlternative = `https://open.er-api.com/v6/latest/AOA`;
+                        const response = await fetch(urlAlternative);
+                        const data = await response.json();
+                        
+                        if (data && data.rates && data.rates[to]) {
+                            const valorEmBRL = data.rates[to]; // Quanto vale 1 Kwanza em Real
+                            
+                            const card = document.createElement("div");
+                            card.classList.add("currency-card");
+                            card.innerHTML = `
+                                <h2>Kwanza Angolano/Real Brasileiro</h2>
+                                <p><strong>Valor de Compra:</strong> R$ ${valorEmBRL.toFixed(4)}</p>
+                                <p><strong>Valor de Venda:</strong> R$ ${valorEmBRL.toFixed(4)}</p>
+                                <p><strong>Variação:</strong> N/A</p>
+                                <p><strong>Atualização:</strong> ${new Date(data.time_last_update_utc).toLocaleString('pt-BR')}</p>
+                            `;
+                            currencyDataDiv.appendChild(card);
+                        } else {
+                            throw new Error();
+                        }
+                        return; // Para a execução aqui para o Kwanza
+                    }
+
+                    // PARA AS OUTRAS MOEDAS: Continua usando a AwesomeAPI padrão
+                    const url = `https://economia.awesomeapi.com.br/json/last/${from}-${to}`;
                     const response = await fetch(url);
                     const data = await response.json();
                     const currencyPair = data[`${from}${to}`];
@@ -64,7 +88,6 @@
                         const card = document.createElement("div");
                         card.classList.add("currency-card");
                         
-                        // Correção dos métodos parseFloat e strings cortadas
                         card.innerHTML = `
                             <h2>${currencyPair.name}</h2>
                             <p><strong>Valor de Compra:</strong> R$ ${parseFloat(currencyPair.bid).toFixed(2)}</p>
@@ -74,10 +97,7 @@
                         `;
                         currencyDataDiv.appendChild(card);
                     } else {
-                        const errorCard = document.createElement("div");
-                        errorCard.classList.add("currency-card");
-                        errorCard.innerHTML = `<p>Não foi possível obter dados para ${from}-${to}.</p>`;
-                        currencyDataDiv.appendChild(errorCard);
+                        throw new Error();
                     }
                 } catch (error) {
                     console.error(`Erro ao buscar ${from}-${to}:`, error);
@@ -88,10 +108,11 @@
                 }
             }
 
-            // Chamadas das funções (descomentei Euro e Bitcoin para você ver rodando tudo junto!)
+            // Chamada das funções em ordem
             fetchCurrency("USD", "BRL");
             fetchCurrency("EUR", "BRL");
             fetchCurrency("BTC", "BRL");
+            fetchCurrency("AOA", "BRL"); // Agora vai funcionar perfeitamente!
         });
     </script>
 </body>
